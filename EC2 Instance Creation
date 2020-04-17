@@ -1,0 +1,49 @@
+Provider “aws”{
+Region = “us-west-2”
+Access-key = “XXXX”
+Secret-key = “XXXXX”
+resource “aws_instance” “my_ec2”{
+ami = “ami-02fd0b06f06d93dfc”
+instance_type = “t2.micro”
+vpc_security_group_ids = [“${aws_security_group.webserver.id”}]
+tags {
+Name = "test"
+}
+}
+resource “aws_ami_from_instance” “my_ec2” {
+name = “my_ec2”
+source_instance_id = “${aws_instance.team3.id}”
+}
+To configure Security Group
+resource "aws_security_group" "webserver" {
+  name        = "webserver"
+  vpc_id      = "${aws_vpc.main.id}"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "TCP"
+    cidr_blocks = "[0.0.0.0/0]"
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "TCP"
+    cidr_blocks = "[::/0]"
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "TCP"
+    cidr_blocks = "[0.0.0.0/0]"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
