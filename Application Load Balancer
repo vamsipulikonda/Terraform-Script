@@ -1,0 +1,52 @@
+module "alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 5.0"
+  
+  name = "ALB1"
+
+  load_balancer_type = "application"
+
+  vpc_id             = "vpc-abcde012"
+  subnets            = ["subnet-abcde012", "subnet-bcde012a"]
+  security_groups    = ["sg-edcd9784", "sg-edcd9785"]
+  
+  access_logs = {
+    bucket = "my-alb-logs"
+  }
+
+  target_groups = [
+    {
+      name_prefix      = "TG1"
+      backend_protocol = "HTTP"
+      backend_port     = 80
+      target_type      = "instance"
+    }
+  ]
+
+  listener {
+    instance_port     = 80
+    instance_protocol = "http"
+    lb_port           = 80
+    lb_protocol       = "http"
+  }
+
+  listener {
+    instance_port      = 80
+    instance_protocol  = "https"
+    lb_port            = 443
+    lb_protocol        = "https"
+    ssl_certificate_id = "arn:aws:iam::123456789012:server-certificate/certName"
+  }
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    target              = "HTTP:8000/"
+    interval            = 30
+  }
+
+
+  tags = {
+    Environment = "Test"
+  }
+}
